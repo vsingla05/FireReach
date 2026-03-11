@@ -7,6 +7,13 @@ app = Flask(__name__)
 # Allow all origins for local development
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+@app.route("/")
+def home():
+    return {
+        "message": "FireReach API is running",
+        "endpoint": "/run-agent"
+    }
+
 
 @app.route("/health", methods=["GET"])
 def health():

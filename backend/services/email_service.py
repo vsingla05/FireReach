@@ -1,22 +1,22 @@
-import smtplib
-from email.mime.text import MIMEText
-from config import SMTP_EMAIL, SMTP_PASSWORD
+import resend
+import os
+
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 
 def send_email(to_email, subject, body):
 
-    msg = MIMEText(body)
+    try:
+        response = resend.Emails.send({
+            "from": "FireReach <onboarding@resend.dev>",
+            "to": [to_email],
+            "subject": subject,
+            "html": f"<p>{body}</p>"
+        })
 
-    msg["Subject"] = subject
-    msg["From"] = SMTP_EMAIL
-    msg["To"] = to_email
+        print("Email sent:", response)
+        return "Email sent successfully"
 
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-
-    server.starttls()
-
-    server.login(SMTP_EMAIL, SMTP_PASSWORD)
-
-    server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
-
-    server.quit()
+    except Exception as e:
+        print("Resend error:", e)
+        raise e

@@ -22,6 +22,6 @@ The email must reference the signals explicitly.
 
     email_body = generate_text(prompt)
 
-    # send_email(email, "Quick idea regarding your recent growth", email_body)
+    send_email(email, "Quick idea regarding your recent growth", email_body)
 
     return email_body

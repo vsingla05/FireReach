@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_URL = "http://127.0.0.1:5001/run-agent"
+const API_URL = "https://firereach-l633.onrender.com/run-agent"
 
 export const runAgent = async(data)=>{
 

@@ -1,11 +1,10 @@
 import axios from "axios"
 
+const API_URL = "https://firereach-l633.onrender.com/run-agent"
+
 export const runAgent = async(data)=>{
 
-const res = await axios.post(
-"http://127.0.0.1:5000/run-agent",
-data
-)
+const res = await axios.post(API_URL,data)
 
 return res.data
 

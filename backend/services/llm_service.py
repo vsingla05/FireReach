@@ -8,7 +8,7 @@ client = Groq(api_key=GROQ_API_KEY)
 def generate_text(prompt):
     """Generate text using Groq via the groq SDK."""
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         messages=[
             {"role": "user", "content": prompt}
         ]

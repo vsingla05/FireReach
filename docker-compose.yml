@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: firereach-backend
+    ports:
+      - "5001:5000"
+    # To pass your environment variables from the .env file
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    networks:
+      - firereach-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: firereach-frontend
+    ports:
+      - "80:80"   # Maps your local port 80 to Nginx
+      # If port 80 is occupied, you can change this to "3000:80" for example
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - firereach-network
+
+networks:
+  firereach-network:
+    driver: bridge

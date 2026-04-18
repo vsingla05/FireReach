@@ -16,10 +16,12 @@ export default function Dashboard() {
   const [activeStep, setActiveStep] = useState(0)
   const [doneSteps, setDoneSteps] = useState([])
 
-  const handleRun = async (data) => {
+  const handleRun = async (targets) => {
+    if (!Array.isArray(targets) || targets.length === 0) return;
+    
     setLoading(true)
     setError(null)
-    setResult(null)
+    setResult([]) // result is now an array
     setActiveStep(1)
     setDoneSteps([])
 
@@ -35,7 +37,9 @@ export default function Dashboard() {
         setActiveStep(3)
       }, 7000)
 
-      const response = await runAgent(data)
+      // Run ALL agents concurrently
+      const runPromises = targets.map(target => runAgent(target));
+      const responses = await Promise.all(runPromises);
 
       clearTimeout(stepTimer1)
       clearTimeout(stepTimer2)
@@ -45,7 +49,12 @@ export default function Dashboard() {
 
       // Slight delay so user sees all steps done
       setTimeout(() => {
-        setResult(response)
+        // Tag responses with their target context so they can be rendered nicely
+        const taggedResponses = responses.map((res, idx) => ({
+            ...res,
+            targetCtx: targets[idx]
+        }));
+        setResult(taggedResponses)
         setLoading(false)
       }, 500)
     } catch (err) {
@@ -146,14 +155,24 @@ export default function Dashboard() {
       )}
 
       {/* Results */}
-      {result && !loading && (
-        <div className="glass-card" style={{ marginTop: "32px" }}>
-          <ResultPanel result={result} />
+      {result?.length > 0 && !loading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "32px", marginTop: "32px" }}>
+            {result.map((res, idx) => (
+                <div key={idx} className="glass-card">
+                  <div style={{ padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.02)" }}>
+                      <h3 style={{ margin: 0, color: "#fff" }}>Agent Result: {res.targetCtx.company}</h3>
+                      <p style={{ margin: "4px 0 0 0", color: "rgba(255,255,255,0.6)", fontSize: "0.9rem" }}>
+                          Sent to: {res.targetCtx.employee_name} ({res.targetCtx.email})
+                      </p>
+                  </div>
+                  <ResultPanel result={res} />
+                </div>
+            ))}
         </div>
       )}
 
       {/* Pipeline explanation */}
-      {!loading && !result && (
+      {!loading && (!result || result.length === 0) && (
         <section className="pipeline-section" aria-labelledby="pipeline-label">
           <div className="section-label" id="pipeline-label">How It Works</div>
           <div className="pipeline-steps" role="list">

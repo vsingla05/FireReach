@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { sendDraft } from "../services/api"
 
 const SIGNAL_ICONS = {
   funding: "💰",
@@ -109,8 +110,10 @@ function ResearchTab({ research }) {
   )
 }
 
-function EmailTab({ email }) {
+function EmailTab({ email, targetEmail }) {
   const [copied, setCopied] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sentStatus, setSentStatus] = useState(null) // "success" or "error"
 
   const handleCopy = () => {
     navigator.clipboard.writeText(email || "")
@@ -118,19 +121,54 @@ function EmailTab({ email }) {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleSend = async () => {
+      setSending(true)
+      try {
+          await sendDraft(targetEmail, email, "FireReach Outreach")
+          setSentStatus("success")
+      } catch (err) {
+          console.error(err)
+          setSentStatus("error")
+      }
+      setSending(false)
+      setTimeout(() => setSentStatus(null), 4000)
+  }
+
   return (
     <div className="email-panel">
-      <div className="email-toolbar">
-        <span className="email-toolbar-label">📧 Generated Email</span>
-        <button
-          id="copy-email-btn"
-          className={`copy-btn ${copied ? "copied" : ""}`}
-          onClick={handleCopy}
-          disabled={!email}
-        >
-          {copied ? "✓ Copied!" : "⧉ Copy Email"}
-        </button>
+      <div className="email-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px", marginBottom: "16px" }}>
+        <span className="email-toolbar-label">📧 Generated Email Preview</span>
+        <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              id="copy-email-btn"
+              className={`copy-btn ${copied ? "copied" : ""}`}
+              onClick={handleCopy}
+              disabled={!email}
+            >
+              {copied ? "✓ Copied!" : "⧉ Copy"}
+            </button>
+            <button
+              className={`btn-primary`}
+              style={{ padding: "4px 16px", fontSize: "0.85rem", margin: 0 }}
+              onClick={handleSend}
+              disabled={!email || sending}
+            >
+              {sending ? "Sending..." : "📤 Fire Email"}
+            </button>
+        </div>
       </div>
+      
+      {sentStatus === "success" && (
+          <div style={{ background: "rgba(74, 222, 128, 0.15)", border: "1px solid #4ade80", color: "#4ade80", padding: "8px 12px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: "bold" }}>
+              ✓ Email successfully sent via Resend!
+          </div>
+      )}
+      {sentStatus === "error" && (
+          <div style={{ background: "rgba(248, 113, 113, 0.15)", border: "1px solid #f87171", color: "#f87171", padding: "8px 12px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: "bold" }}>
+              ⚠️ Failed to send. Make sure you use your verified email domain.
+          </div>
+      )}
+
       <div className="email-body">
         {email || "No email generated."}
       </div>
@@ -187,7 +225,7 @@ export default function ResultPanel({ result }) {
       {/* Tab content */}
       {activeTab === "signals" && <SignalsTab signals={signals} />}
       {activeTab === "research" && <ResearchTab research={research} />}
-      {activeTab === "email" && <EmailTab email={email} />}
+      {activeTab === "email" && <EmailTab email={email} targetEmail={result?.targetCtx?.email} />}
     </div>
   )
 }

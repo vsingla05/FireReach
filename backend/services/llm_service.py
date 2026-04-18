@@ -14,3 +14,14 @@ def generate_text(prompt):
         ]
     )
     return response.choices[0].message.content
+
+def generate_json(prompt):
+    """Generate JSON using Groq."""
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        response_format={"type": "json_object"}
+    )
+    return response.choices[0].message.content

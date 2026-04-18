@@ -3,11 +3,12 @@ from tools.research_analyst import tool_research_analyst
 from tools.outreach_sender import tool_outreach_automated_sender
 
 
-def run_agent(icp, company, email):
+def run_agent(icp, company, email, employee_name="", employee_role="", employee_dept=""):
 
     print(f"\n{'='*50}")
     print(f"🚀 FireReach Agent Starting")
     print(f"   Company: {company}")
+    print(f"   Employee: {employee_name} ({employee_role})")
     print(f"   ICP: {icp[:80]}...")
     print(f"   Email: {email}")
     print(f"{'='*50}\n")
@@ -25,7 +26,10 @@ def run_agent(icp, company, email):
         company,
         email,
         signals,
-        research
+        research,
+        employee_name,
+        employee_role,
+        employee_dept
     )
     print("   ✓ Email draft ready")
 

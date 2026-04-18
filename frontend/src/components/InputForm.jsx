@@ -177,7 +177,7 @@ export default function InputForm({ onRun, disabled }) {
                     <button 
                         type="button" 
                         className="btn-secondary" 
-                        style={{ padding: "0 16px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.2)", cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap" }}
+                        style={{ padding: "0 16px", borderRadius: "8px", background: "var(--color-surface-3)", color: "var(--color-text-primary)", border: "1px solid var(--color-border)", cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap" }}
                         onClick={handleAddManualCompany}
                         disabled={disabled || isFindingCompanies || !targetCompanyInput.trim()}
                     >
@@ -189,8 +189,8 @@ export default function InputForm({ onRun, disabled }) {
 
             {/* Companies List */}
             {companies.length > 0 && (
-                <div className="form-group form-grid-full" style={{ background: "rgba(0,0,0,0.2)", padding: "16px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <label className="form-label" style={{ fontSize: "1.1rem", marginBottom: "12px" }}>Matched Companies</label>
+                <div className="form-group form-grid-full" style={{ background: "var(--color-surface-3)", padding: "16px", borderRadius: "12px", border: "1px solid var(--color-border)" }}>
+                    <label className="form-label" style={{ fontSize: "1.1rem", marginBottom: "12px", color: "var(--color-text-primary)" }}>Matched Companies</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         {companies.map((c, idx) => {
                             const isSelected = selectedCompanies.some(sc => sc.domain === c.domain);
@@ -198,24 +198,24 @@ export default function InputForm({ onRun, disabled }) {
                             const selEmps = selectedTargets[c.domain] || [];
 
                             return (
-                                <div key={idx} style={{ background: "rgba(255,255,255,0.03)", padding: "12px", borderRadius: "8px", border: isSelected ? "1px solid #3b82f6" : "1px solid transparent" }}>
+                                <div key={idx} style={{ background: "var(--color-surface-1)", padding: "12px", borderRadius: "8px", border: isSelected ? "1px solid var(--color-primary)" : "1px solid var(--color-border)", boxShadow: "var(--shadow-sm)" }}>
                                     
                                     {/* Company Header */}
                                     <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => toggleCompany(c)}>
                                         <input type="checkbox" checked={isSelected} readOnly style={{ width: "20px", height: "20px", cursor: "pointer" }} />
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "white" }}>{c.name}</div>
-                                            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.9rem" }}>{c.domain}</div>
+                                            <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "var(--color-text-primary)" }}>{c.name}</div>
+                                            <div style={{ color: "var(--color-text-muted)", fontSize: "0.9rem" }}>{c.domain}</div>
                                         </div>
                                     </div>
 
                                     {/* Employee Selector (Only show if company is selected) */}
                                     {isSelected && (
-                                        <div style={{ marginTop: "16px", paddingLeft: "32px", borderLeft: "2px solid rgba(255,255,255,0.1)" }}>
-                                            <label className="form-label" style={{ color: "#4ade80", fontSize: "0.9rem" }}>Select Target Employees (can select multiple)</label>
+                                        <div style={{ marginTop: "16px", paddingLeft: "32px", borderLeft: "2px solid var(--color-border)" }}>
+                                            <label className="form-label" style={{ color: "var(--color-primary)", fontSize: "0.9rem" }}>Select Target Employees (can select multiple)</label>
                                             
                                             {emps.length === 0 ? (
-                                                <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" }}>Loading directory...</div>
+                                                <div style={{ color: "var(--color-text-muted)", fontSize: "0.85rem" }}>Loading directory...</div>
                                             ) : (
                                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
                                                     {emps.map((emp, eIdx) => {
@@ -225,16 +225,17 @@ export default function InputForm({ onRun, disabled }) {
                                                             key={eIdx}
                                                             onClick={e => { e.stopPropagation(); toggleEmployeeForCompany(c.domain, emp); }}
                                                             style={{
-                                                                background: isEmpSelected ? "rgba(74, 222, 128, 0.15)" : "rgba(255,255,255,0.05)",
-                                                                border: isEmpSelected ? "1px solid #4ade80" : "1px solid rgba(255,255,255,0.1)",
+                                                                background: isEmpSelected ? "var(--color-primary-subtle)" : "var(--color-surface-2)",
+                                                                border: isEmpSelected ? "1px solid var(--color-primary)" : "1px solid var(--color-border)",
                                                                 padding: "8px 12px",
                                                                 borderRadius: "6px",
                                                                 cursor: "pointer",
-                                                                transition: "all 0.2s"
+                                                                transition: "all 0.2s",
+                                                                boxShadow: isEmpSelected ? "var(--shadow-glow)" : "var(--shadow-sm)"
                                                             }}
                                                         >
-                                                            <div style={{ color: "white", fontWeight: "600", fontSize: "0.9rem" }}>{emp.first_name} {emp.last_name}</div>
-                                                            <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem" }}>{emp.position}</div>
+                                                            <div style={{ color: "var(--color-text-primary)", fontWeight: "600", fontSize: "0.9rem" }}>{emp.first_name} {emp.last_name}</div>
+                                                            <div style={{ color: "var(--color-text-muted)", fontSize: "0.8rem" }}>{emp.position}</div>
                                                         </div>
                                                     )})}
                                                 </div>

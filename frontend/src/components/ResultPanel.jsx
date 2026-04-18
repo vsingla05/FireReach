@@ -72,10 +72,10 @@ function SignalsTab({ signals }) {
               onClick={() => setFilter(t)}
               style={{
                 padding: "5px 14px",
-                border: `1px solid ${filter === t ? "rgba(255,92,43,0.4)" : "rgba(255,255,255,0.08)"}`,
+                border: `1px solid ${filter === t ? "var(--color-primary-light)" : "var(--color-border)"}`,
                 borderRadius: "9999px",
-                background: filter === t ? "rgba(255,92,43,0.12)" : "transparent",
-                color: filter === t ? "#ff7a50" : "#94a3b8",
+                background: filter === t ? "var(--color-primary-subtle)" : "transparent",
+                color: filter === t ? "var(--color-primary)" : "var(--color-text-secondary)",
                 fontSize: "12px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -110,10 +110,16 @@ function ResearchTab({ research }) {
   )
 }
 
-function EmailTab({ email, targetEmail }) {
+function EmailTab({ results }) {
+  const [selectedIdx, setSelectedIdx] = useState(0)
   const [copied, setCopied] = useState(false)
   const [sending, setSending] = useState(false)
   const [sentStatus, setSentStatus] = useState(null) // "success" or "error"
+
+  // Derive current result from selected index
+  const result = results[selectedIdx]
+  const email = result?.email || ""
+  const targetEmail = result?.targetCtx?.email || ""
 
   const handleCopy = () => {
     navigator.clipboard.writeText(email || "")
@@ -136,7 +142,40 @@ function EmailTab({ email, targetEmail }) {
 
   return (
     <div className="email-panel">
-      <div className="email-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px", marginBottom: "16px" }}>
+      {/* Target Selector */}
+      {results.length > 1 && (
+          <div style={{ padding: "12px 20px", display: "flex", gap: "10px", overflowX: "auto", borderBottom: "1px solid var(--color-border)", background: "rgba(0,0,0,0.02)" }}>
+              {results.map((r, idx) => {
+                  const isSel = idx === selectedIdx;
+                  return (
+                      <button 
+                          key={idx}
+                          onClick={() => {
+                              setSelectedIdx(idx)
+                              setSentStatus(null)
+                          }}
+                          style={{
+                              padding: "6px 14px",
+                              borderRadius: "999px",
+                              background: isSel ? "var(--color-primary)" : "var(--color-surface-1)",
+                              color: isSel ? "#fff" : "var(--color-text-secondary)",
+                              border: isSel ? "1px solid var(--color-primary)" : "1px solid var(--color-border)",
+                              cursor: "pointer",
+                              fontSize: "0.85rem",
+                              fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              boxShadow: isSel ? "var(--shadow-glow)" : "var(--shadow-sm)",
+                              transition: "all 0.2s"
+                          }}
+                      >
+                          {r.targetCtx.employee_name}
+                      </button>
+                  )
+              })}
+          </div>
+      )}
+
+      <div className="email-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--color-border)", paddingBottom: "12px", marginBottom: "16px", marginTop: "16px", paddingLeft: "20px", paddingRight: "20px" }}>
         <span className="email-toolbar-label">📧 Generated Email Preview</span>
         <div style={{ display: "flex", gap: "8px" }}>
             <button
@@ -159,13 +198,13 @@ function EmailTab({ email, targetEmail }) {
       </div>
       
       {sentStatus === "success" && (
-          <div style={{ background: "rgba(74, 222, 128, 0.15)", border: "1px solid #4ade80", color: "#4ade80", padding: "8px 12px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: "bold" }}>
-              ✓ Email successfully sent via Resend!
+          <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid var(--color-accent-green)", color: "var(--color-accent-green)", padding: "8px 12px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: "bold" }}>
+              ✓ Email successfully sent!
           </div>
       )}
       {sentStatus === "error" && (
-          <div style={{ background: "rgba(248, 113, 113, 0.15)", border: "1px solid #f87171", color: "#f87171", padding: "8px 12px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: "bold" }}>
-              ⚠️ Failed to send. Make sure you use your verified email domain.
+          <div style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid #ef4444", color: "#ef4444", padding: "8px 12px", borderRadius: "6px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: "bold" }}>
+              ⚠️ Failed to send check your SMTP credentials.
           </div>
       )}
 
@@ -176,11 +215,13 @@ function EmailTab({ email, targetEmail }) {
   )
 }
 
-export default function ResultPanel({ result }) {
+export default function ResultPanel({ results }) {
   const [activeTab, setActiveTab] = useState("signals")
-  const signals = result?.signals || []
-  const research = result?.research || ""
-  const email = result?.email || ""
+  
+  // Use the first result's signals and research since they are shared at the company level
+  const firstRes = results && results.length > 0 ? results[0] : null
+  const signals = firstRes?.signals || []
+  const research = firstRes?.research || ""
 
   const tabs = [
     { id: "signals", label: "Signals", icon: "📡", count: signals.length },
@@ -225,7 +266,7 @@ export default function ResultPanel({ result }) {
       {/* Tab content */}
       {activeTab === "signals" && <SignalsTab signals={signals} />}
       {activeTab === "research" && <ResearchTab research={research} />}
-      {activeTab === "email" && <EmailTab email={email} targetEmail={result?.targetCtx?.email} />}
+      {activeTab === "email" && <EmailTab results={results} />}
     </div>
   )
 }

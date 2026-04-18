@@ -2,27 +2,29 @@
    DESIGN TOKENS
 =========================== */
 :root {
-  --color-bg: #080c14;
-  --color-surface-1: #0e1420;
-  --color-surface-2: #141b2d;
-  --color-surface-3: #1a2236;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.14);
+  --color-bg: #F8FAFC;
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #FFFFFF;
+  --color-surface-3: #F1F5F9;
+  --color-border: rgba(15, 23, 42, 0.08);
+  --color-border-hover: rgba(15, 23, 42, 0.15);
 
   --color-primary: #ff5c2b;
   --color-primary-light: #ff7a50;
-  --color-primary-glow: rgba(255, 92, 43, 0.25);
-  --color-primary-subtle: rgba(255, 92, 43, 0.08);
+  --color-primary-glow: rgba(255, 92, 43, 0.15);
+  --color-primary-subtle: rgba(255, 92, 43, 0.06);
 
   --color-accent-blue: #3b82f6;
   --color-accent-purple: #8b5cf6;
   --color-accent-green: #10b981;
   --color-accent-yellow: #f59e0b;
 
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #475569;
-  --color-text-disabled: #2d3748;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
+  --color-text-disabled: #CBD5E1;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
 
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -33,13 +35,37 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.08);
+  --shadow-glow: 0 8px 24px rgba(255, 92, 43, 0.2);
+
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --color-bg: #080c14;
+  --color-surface-1: #0e1420;
+  --color-surface-2: #141b2d;
+  --color-surface-3: #1a2236;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.14);
+
+  --color-primary-glow: rgba(255, 92, 43, 0.25);
+  --color-primary-subtle: rgba(255, 92, 43, 0.08);
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #475569;
+  --color-text-disabled: #2d3748;
+
+  --glass-bg: rgba(14, 20, 32, 0.7);
+
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
   --shadow-glow: 0 0 40px rgba(255, 92, 43, 0.2);
-
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===========================
@@ -131,7 +157,7 @@ body {
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #fff 40%, rgba(255, 92, 43, 0.8));
+  background: linear-gradient(135deg, var(--color-text-primary) 40%, rgba(255, 92, 43, 0.8));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -234,7 +260,7 @@ body {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -1px;
-  background: linear-gradient(135deg, #fff, var(--color-primary-light));
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -259,14 +285,15 @@ body {
    MAIN CARD / GLASS
 =========================== */
 .glass-card {
-  background: rgba(14, 20, 32, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: 32px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-lg);
   transition: border-color var(--transition);
 }
 
@@ -276,8 +303,8 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 92, 43, 0.5), transparent);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 92, 43, 0.8), transparent);
 }
 
 .glass-card:hover {

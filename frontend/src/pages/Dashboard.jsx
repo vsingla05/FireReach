@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import InputForm from "../components/InputForm"
 import ResultPanel from "../components/ResultPanel"
-import { runAgent } from "../services/api"
+import { runAgent, sendDraft } from "../services/api"
 
 const LOADING_STEPS = [
   { id: 1, label: "Harvesting buying signals", icon: "📡" },
@@ -15,6 +15,43 @@ export default function Dashboard() {
   const [error, setError] = useState(null)
   const [activeStep, setActiveStep] = useState(0)
   const [doneSteps, setDoneSteps] = useState([])
+  const [isBlasting, setIsBlasting] = useState(false)
+  const [blastStatus, setBlastStatus] = useState(null)
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light"
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme)
+    localStorage.setItem("theme", theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"))
+  }
+
+  const handleBlastAll = async () => {
+      if (!result || result.length === 0) return;
+      if (!window.confirm(`Are you absolutely sure you want to blast ${result.length} customized emails automatically?`)) return;
+
+      setIsBlasting(true)
+      setBlastStatus(null)
+      try {
+          // Process sequentially to avoid aggressive SMTP rate limits
+          for (const res of result) {
+              const targetEmail = res.targetCtx.email
+              const body = res.email
+              await sendDraft(targetEmail, body, "FireReach Outreach")
+          }
+          setBlastStatus("success")
+      } catch (err) {
+          console.error(err)
+          setBlastStatus("error")
+      }
+      setIsBlasting(false)
+      setTimeout(() => setBlastStatus(null), 5000)
+  }
 
   const handleRun = async (targets) => {
     if (!Array.isArray(targets) || targets.length === 0) return;
@@ -73,9 +110,30 @@ export default function Dashboard() {
           <div className="fire-icon">🔥</div>
           <span className="brand-name">FireReach</span>
         </a>
-        <div className="navbar-badge">
-          <div className="status-dot" aria-label="System online"></div>
-          AI Agents Online
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <button 
+                onClick={toggleTheme} 
+                style={{
+                    background: "var(--color-surface-2)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-text-primary)",
+                    padding: "6px 12px",
+                    borderRadius: "99px",
+                    cursor: "pointer",
+                    fontSize: "0.85rem",
+                    fontWeight: "600",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    boxShadow: "var(--shadow-sm)"
+                }}
+            >
+                {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+            </button>
+            <div className="navbar-badge">
+              <div className="status-dot" aria-label="System online"></div>
+              AI Agents Online
+            </div>
         </div>
       </nav>
 
@@ -155,21 +213,61 @@ export default function Dashboard() {
       )}
 
       {/* Results */}
-      {result?.length > 0 && !loading && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "32px", marginTop: "32px" }}>
-            {result.map((res, idx) => (
-                <div key={idx} className="glass-card">
-                  <div style={{ padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.02)" }}>
-                      <h3 style={{ margin: 0, color: "#fff" }}>Agent Result: {res.targetCtx.company}</h3>
-                      <p style={{ margin: "4px 0 0 0", color: "rgba(255,255,255,0.6)", fontSize: "0.9rem" }}>
-                          Sent to: {res.targetCtx.employee_name} ({res.targetCtx.email})
-                      </p>
-                  </div>
-                  <ResultPanel result={res} />
+      {result?.length > 0 && !loading && (() => {
+          // Group by company
+          const grouped = result.reduce((acc, res) => {
+              const comp = res.targetCtx.company
+              if (!acc[comp]) acc[comp] = []
+              acc[comp].push(res)
+              return acc
+          }, {})
+
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: "32px", marginTop: "32px" }}>
+                
+                {/* Global Actions */}
+                <div className="glass-card" style={{ padding: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--color-primary-light)", background: "var(--color-primary-subtle)", boxShadow: "var(--shadow-glow)" }}>
+                    <div>
+                        <h3 style={{ margin: 0, color: "var(--color-primary)", display: "flex", alignItems: "center", gap: "8px", fontSize: "1.4rem" }}>🚀 Ready to Fire</h3>
+                        <p style={{ margin: "4px 0 0 0", color: "var(--color-text-secondary)", fontSize: "0.95rem" }}>You have {result.length} fully personalized emails drafted and ready for review.</p>
+                    </div>
+                    <div>
+                        <button 
+                            className="btn-primary" 
+                            style={{ margin: 0, padding: "12px 28px", fontSize: "1rem" }}
+                            onClick={handleBlastAll}
+                            disabled={isBlasting}
+                        >
+                            {isBlasting ? "Sending All..." : `Blast All Emails (${result.length})`}
+                        </button>
+                    </div>
                 </div>
-            ))}
-        </div>
-      )}
+
+                {blastStatus === "success" && (
+                    <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid var(--color-accent-green)", color: "var(--color-accent-green)", padding: "12px 20px", borderRadius: "12px", fontWeight: "bold", fontSize: "1rem" }}>
+                        ✓ Target neutralized. All {result.length} emails successfully blasted!
+                    </div>
+                )}
+                {blastStatus === "error" && (
+                    <div style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid #ef4444", color: "#ef4444", padding: "12px 20px", borderRadius: "12px", fontWeight: "bold", fontSize: "1rem" }}>
+                        ⚠️ Some emails failed to send. Please check your SMTP settings in the terminal.
+                    </div>
+                )}
+
+                {Object.entries(grouped).map(([company, responses], idx) => (
+                    <div key={idx} className="glass-card">
+                      <div style={{ padding: "16px", borderBottom: "1px solid var(--color-border)", background: "var(--color-surface-3)" }}>
+                          <h3 style={{ margin: 0, color: "var(--color-text-primary)" }}>Agent Target Account: {company}</h3>
+                          <p style={{ margin: "4px 0 0 0", color: "var(--color-text-muted)", fontSize: "0.9rem" }}>
+                              {responses.length} employee{responses.length > 1 ? "s" : ""} targeted
+                          </p>
+                      </div>
+                      <ResultPanel results={responses} />
+                    </div>
+                ))}
+            </div>
+          )
+      })()}
 
       {/* Pipeline explanation */}
       {!loading && (!result || result.length === 0) && (
